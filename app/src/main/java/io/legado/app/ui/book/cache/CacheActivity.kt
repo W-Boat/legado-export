@@ -651,7 +651,14 @@ class CacheActivity : VMBaseActivity<ActivityCacheBookBinding, CacheViewModel>()
         alert("预制HTML") {
             customView { view }
             okButton {
-                toastOnUi("预制HTML功能暂不可用")
+                lifecycleScope.launch(IO) {
+                    val path = ACache.get().getAsString(exportBookPathKey) ?: return@launch
+                    val customDir = java.io.File(path, "CustomPages").apply { mkdirs() }
+                    val name = etName.text.toString().ifBlank { "custom_${System.currentTimeMillis()}" }
+                    java.io.File(customDir, "$name.html").writeText(etHtml.text.toString())
+                    java.io.File(customDir, "$name.css").writeText(etCss.text.toString())
+                    toastOnUi("已保存到 CustomPages/$name")
+                }
             }
             cancelButton()
         }

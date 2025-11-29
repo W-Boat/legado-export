@@ -642,7 +642,37 @@ class ExportBookService : BaseService() {
     }
 
     private fun addCustomHtmlPages(epubBook: EpubBook, position: Int) {
-        // Custom HTML pages feature disabled for now
+        kotlin.runCatching {
+            val exportPath = ACache.get().getAsString("exportBookPath") ?: return
+            val customDir = java.io.File(exportPath, "CustomPages")
+            if (!customDir.exists()) return
+
+            customDir.listFiles()?.filter { it.name.endsWith(".html") }?.forEach { htmlFile ->
+                val name = htmlFile.nameWithoutExtension
+                val cssFile = java.io.File(customDir, "$name.css")
+                if (!cssFile.exists()) return@forEach
+
+                val cssPath = "Styles/$name.css"
+                epubBook.resources.add(Resource(cssFile.readBytes(), cssPath))
+
+                val html = htmlFile.readText().replace(
+                    "</head>",
+                    """<link href="../$cssPath" type="text/css" rel="stylesheet"/></head>"""
+                )
+
+                if (position == 0) {
+                    epubBook.spine.spineReferences.add(0,
+                        me.ag2s.epublib.domain.SpineReference(
+                            Resource(html.toByteArray(), "Text/$name.html").also {
+                                epubBook.resources.add(it)
+                            }
+                        )
+                    )
+                } else {
+                    epubBook.addSection(name, Resource(html.toByteArray(), "Text/$name.html"))
+                }
+            }
+        }
     }
 
     private fun setEpubMetadata(book: Book, epubBook: EpubBook) {
