@@ -90,9 +90,7 @@ object EpubExportHelper {
         if (!config.exportLanguage) metadata.language = ""
         if (!config.exportDate) metadata.dates.clear()
 
-        config.customMetadata.forEach { (key, value) ->
-            metadata.otherProperties.add(me.ag2s.epublib.domain.Metadata.OtherProperty(key, value))
-        }
+        // Custom metadata not supported in current version
     }
 
     /**
