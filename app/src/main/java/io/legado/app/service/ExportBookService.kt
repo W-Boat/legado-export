@@ -26,6 +26,7 @@ import io.legado.app.help.config.AppConfig
 import io.legado.app.model.ReadBook
 import io.legado.app.model.localBook.LocalBook
 import io.legado.app.ui.book.cache.CacheActivity
+import io.legado.app.utils.ACache
 import io.legado.app.utils.FileDoc
 import io.legado.app.utils.FileUtils
 import io.legado.app.utils.HtmlFormatter
@@ -647,8 +648,8 @@ class ExportBookService : BaseService() {
 
             customPath.list()?.filter { it.name.endsWith(".html") }?.forEach { htmlFile ->
                 val name = htmlFile.name.removeSuffix(".html")
-                val cssFile = customPath.find("$name.css")
-                if (cssFile == null || !cssFile.exists()) return@forEach
+                val cssFile = customPath.find("$name.css") ?: return@forEach
+                if (!cssFile.exists()) return@forEach
 
                 val cssPath = "Styles/$name.css"
                 epubBook.resources.add(Resource(cssFile.readBytes(), cssPath))
