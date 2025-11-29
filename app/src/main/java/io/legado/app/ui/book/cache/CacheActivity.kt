@@ -216,6 +216,8 @@ class CacheActivity : VMBaseActivity<ActivityCacheBookBinding, CacheViewModel>()
             R.id.menu_export_file_name -> alertExportFileName()
             R.id.menu_export_type -> showExportTypeConfig()
             R.id.menu_export_charset -> showCharsetConfig()
+            R.id.menu_epub_settings -> showEpubSettings()
+            R.id.menu_custom_html -> showCustomHtmlEditor()
             R.id.menu_log -> showDialogFragment<AppLogDialog>()
             else -> if (item.groupId == R.id.menu_group) {
                 binding.titleBar.subtitle = item.title
@@ -580,6 +582,81 @@ class CacheActivity : VMBaseActivity<ActivityCacheBookBinding, CacheViewModel>()
             customView { alertBinding.root }
             okButton {
                 AppConfig.exportCharset = alertBinding.editView.text?.toString() ?: "UTF-8"
+            }
+            cancelButton()
+        }
+    }
+
+    private fun showEpubSettings() {
+        val view = layoutInflater.inflate(R.layout.dialog_epub_settings, null)
+
+        val rgEpubVersion = view.findViewById<android.widget.RadioGroup>(R.id.rg_epub_version)
+        val rbEpub2 = view.findViewById<android.widget.RadioButton>(R.id.rb_epub_2)
+        val rbEpub3 = view.findViewById<android.widget.RadioButton>(R.id.rb_epub_3)
+        val rgCssMode = view.findViewById<android.widget.RadioGroup>(R.id.rg_css_mode)
+        val rbCssDefault = view.findViewById<android.widget.RadioButton>(R.id.rb_css_default)
+        val rbCssCustom = view.findViewById<android.widget.RadioButton>(R.id.rb_css_custom)
+        val rbCssAppend = view.findViewById<android.widget.RadioButton>(R.id.rb_css_append)
+        val cbExportLogo = view.findViewById<android.widget.CheckBox>(R.id.cb_export_logo)
+        val cbExportEmptyChapters = view.findViewById<android.widget.CheckBox>(R.id.cb_export_empty_chapters)
+        val cbDuokanFullscreen = view.findViewById<android.widget.CheckBox>(R.id.cb_duokan_fullscreen)
+
+        if (AppConfig.epubVersion == "3.0") rbEpub3.isChecked = true else rbEpub2.isChecked = true
+        when (AppConfig.epubCssMode) {
+            0 -> rbCssDefault.isChecked = true
+            1 -> rbCssCustom.isChecked = true
+            2 -> rbCssAppend.isChecked = true
+        }
+        cbExportLogo.isChecked = AppConfig.epubExportLogo
+        cbExportEmptyChapters.isChecked = AppConfig.epubExportEmptyChapters
+        cbDuokanFullscreen.isChecked = AppConfig.epubEnableDuokanFullscreen
+
+        alert("EPUB设置") {
+            customView { view }
+            okButton {
+                AppConfig.epubVersion = if (rbEpub3.isChecked) "3.0" else "2.0"
+                AppConfig.epubCssMode = when {
+                    rbCssDefault.isChecked -> 0
+                    rbCssCustom.isChecked -> 1
+                    rbCssAppend.isChecked -> 2
+                    else -> 0
+                }
+                AppConfig.epubExportLogo = cbExportLogo.isChecked
+                AppConfig.epubExportEmptyChapters = cbExportEmptyChapters.isChecked
+                AppConfig.epubEnableDuokanFullscreen = cbDuokanFullscreen.isChecked
+            }
+            cancelButton()
+        }
+    }
+
+    private fun showCustomHtmlEditor() {
+        val view = layoutInflater.inflate(R.layout.dialog_html_editor, null)
+        val etName = view.findViewById<android.widget.EditText>(R.id.et_page_name)
+        val rgPosition = view.findViewById<android.widget.RadioGroup>(R.id.rg_position)
+        val etHtml = view.findViewById<android.widget.EditText>(R.id.et_html)
+        val etCss = view.findViewById<android.widget.EditText>(R.id.et_css)
+        val btnPreview = view.findViewById<android.widget.Button>(R.id.btn_preview)
+
+        btnPreview.setOnClickListener {
+            val html = """<html><head><style>${etCss.text}</style></head><body>${etHtml.text}</body></html>"""
+            alert("预览") {
+                val webView = android.webkit.WebView(this@CacheActivity).apply {
+                    loadDataWithBaseURL(null, html, "text/html", "UTF-8", null)
+                }
+                customView { webView }
+                okButton()
+            }
+        }
+
+        alert("预制HTML") {
+            customView { view }
+            okButton {
+                val path = ACache.get().getAsString("exportBookPath") ?: return@okButton
+                val customDir = FileDoc.fromDir(path).createFileIfNotExist("CustomPages", true)
+                val name = etName.text.toString().ifBlank { "custom_${System.currentTimeMillis()}" }
+                customDir.createFileIfNotExist("$name.html").writeText(etHtml.text.toString())
+                customDir.createFileIfNotExist("$name.css").writeText(etCss.text.toString())
+                toastOnUi("已保存到 CustomPages/$name")
             }
             cancelButton()
         }

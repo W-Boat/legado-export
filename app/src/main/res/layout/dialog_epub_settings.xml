@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="EPUB版本"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <RadioGroup
+            android:id="@+id/rg_epub_version"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/rb_epub_2"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="EPUB 2.0" />
+
+            <RadioButton
+                android:id="@+id/rb_epub_3"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="EPUB 3.0" />
+        </RadioGroup>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginVertical="8dp"
+            android:background="?android:attr/listDivider" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="CSS模式"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+
+        <RadioGroup
+            android:id="@+id/rg_css_mode"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <RadioButton
+                android:id="@+id/rb_css_default"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="默认CSS" />
+
+            <RadioButton
+                android:id="@+id/rb_css_custom"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="自定义CSS" />
+
+            <RadioButton
+                android:id="@+id/rb_css_append"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="追加CSS" />
+        </RadioGroup>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_marginVertical="8dp"
+            android:background="?android:attr/listDivider" />
+
+        <CheckBox
+            android:id="@+id/cb_export_logo"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="导出Logo" />
+
+        <CheckBox
+            android:id="@+id/cb_export_empty_chapters"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="导出空章节" />
+
+        <CheckBox
+            android:id="@+id/cb_duokan_fullscreen"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="多看全屏封面" />
+
+    </LinearLayout>
+</ScrollView>

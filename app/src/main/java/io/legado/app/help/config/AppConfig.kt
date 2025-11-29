@@ -432,6 +432,36 @@ object AppConfig : SharedPreferences.OnSharedPreferenceChangeListener {
             appCtx.putPrefBoolean(PreferKey.parallelExportBook, value)
         }
 
+    var epubCssMode: Int
+        get() = appCtx.getPrefInt(PreferKey.epubCssMode, 0)
+        set(value) {
+            appCtx.putPrefInt(PreferKey.epubCssMode, value)
+        }
+
+    var epubVersion: String
+        get() = appCtx.getPrefString(PreferKey.epubVersion) ?: "2.0"
+        set(value) {
+            appCtx.putPrefString(PreferKey.epubVersion, value)
+        }
+
+    var epubExportLogo: Boolean
+        get() = appCtx.getPrefBoolean(PreferKey.epubExportLogo, true)
+        set(value) {
+            appCtx.putPrefBoolean(PreferKey.epubExportLogo, value)
+        }
+
+    var epubExportEmptyChapters: Boolean
+        get() = appCtx.getPrefBoolean(PreferKey.epubExportEmptyChapters, true)
+        set(value) {
+            appCtx.putPrefBoolean(PreferKey.epubExportEmptyChapters, value)
+        }
+
+    var epubEnableDuokanFullscreen: Boolean
+        get() = appCtx.getPrefBoolean(PreferKey.epubEnableDuokanFullscreen, false)
+        set(value) {
+            appCtx.putPrefBoolean(PreferKey.epubEnableDuokanFullscreen, value)
+        }
+
     var changeSourceCheckAuthor: Boolean
         get() = appCtx.getPrefBoolean(PreferKey.changeSourceCheckAuthor)
         set(value) {

@@ -83,6 +83,16 @@
         app:showAsAction="never" />
 
     <item
+        android:id="@+id/menu_epub_settings"
+        android:title="EPUB设置"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/menu_custom_html"
+        android:title="预制HTML"
+        app:showAsAction="never" />
+
+    <item
         android:id="@+id/menu_log"
         android:title="@string/log"
         app:showAsAction="never" />

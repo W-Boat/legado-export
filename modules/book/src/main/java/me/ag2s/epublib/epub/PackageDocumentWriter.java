@@ -194,6 +194,11 @@ public class PackageDocumentWriter extends PackageDocumentBase {
                         .attribute(EpubWriter.EMPTY_NAMESPACE_PREFIX, OPFAttributes.linear,
                                 OPFValues.no);
             }
+            if (spineReference.getProperties() != null && !spineReference.getProperties().isEmpty()) {
+                serializer
+                        .attribute(EpubWriter.EMPTY_NAMESPACE_PREFIX, OPFAttributes.properties,
+                                spineReference.getProperties());
+            }
             serializer.endTag(NAMESPACE_OPF, OPFTags.itemref);
         }
     }

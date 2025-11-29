@@ -354,7 +354,7 @@ class ExportBookService : BaseService() {
         fileDoc.find(filename)?.delete()
 
         val epubBook = EpubBook()
-        epubBook.version = "2.0"
+        epubBook.version = AppConfig.epubVersion
         //set metadata
         setEpubMetadata(book, epubBook)
         //set cover
@@ -362,8 +362,14 @@ class ExportBookService : BaseService() {
         //set css
         val contentModel = setAssets(fileDoc, book, epubBook)
 
+        //添加开头预制HTML
+        addCustomHtmlPages(epubBook, 0)
+
         //设置正文
         setEpubContent(contentModel, book, epubBook)
+
+        //添加结尾预制HTML
+        addCustomHtmlPages(epubBook, 1)
 
         val bookDoc = fileDoc.createFileIfNotExist(filename)
         bookDoc.openOutputStream().getOrThrow().buffered().use { bookOs ->
@@ -467,12 +473,14 @@ class ExportBookService : BaseService() {
                 "Styles/main.css"
             )
         )
-        epubBook.resources.add(
-            Resource(
-                appCtx.assets.open("epub/logo.png").readBytes(),
-                "Images/logo.png"
+        if (AppConfig.epubExportLogo) {
+            epubBook.resources.add(
+                Resource(
+                    appCtx.assets.open("epub/logo.png").readBytes(),
+                    "Images/logo.png"
+                )
             )
-        )
+        }
         epubBook.addSection(
             getString(R.string.img_cover),
             ResourceUtil.createPublicResource(
@@ -576,9 +584,11 @@ class ExportBookService : BaseService() {
             if (chapter.isVolume) {
                 parentSection = epubBook.addSection(title, chapterResource)
             } else if (parentSection == null) {
-                epubBook.addSection(title, chapterResource)
+                val tocRef = epubBook.addSection(title, chapterResource)
+                applyDuokanFullscreen(epubBook, tocRef, chapterResource)
             } else {
-                epubBook.addSection(parentSection, title, chapterResource)
+                val tocRef = epubBook.addSection(parentSection, title, chapterResource)
+                applyDuokanFullscreen(epubBook, tocRef, chapterResource)
             }
         }
     }
@@ -619,6 +629,47 @@ class ExportBookService : BaseService() {
             data.append(text1).append("\n")
         }
         return data.toString() to resources
+    }
+
+    private fun applyDuokanFullscreen(epubBook: EpubBook, tocRef: TOCReference, resource: Resource) {
+        if (AppConfig.epubEnableDuokanFullscreen) {
+            val spineRef = epubBook.spine.spineReferences.find {
+                it.resourceId == resource.id
+            }
+            spineRef?.properties = "duokan-page-fullscreen"
+        }
+    }
+
+    private fun addCustomHtmlPages(epubBook: EpubBook, position: Int) {
+        val customPath = FileDoc.fromDir(ACache.get().getAsString("exportBookPath") ?: return)
+            .find("CustomPages") ?: return
+
+        customPath.list()?.filter { it.name.endsWith(".html") }?.forEach { htmlFile ->
+            val name = htmlFile.name.removeSuffix(".html")
+            val cssFile = customPath.find("$name.css")
+
+            if (cssFile?.exists() == true) {
+                val cssPath = "Styles/$name.css"
+                epubBook.resources.add(Resource(cssFile.readBytes(), cssPath))
+
+                val html = htmlFile.readText().replace(
+                    "</head>",
+                    """<link href="../$cssPath" type="text/css" rel="stylesheet"/></head>"""
+                )
+
+                if (position == 0) {
+                    epubBook.spine.spineReferences.add(0,
+                        me.ag2s.epublib.domain.SpineReference(
+                            Resource(html.toByteArray(), "Text/$name.html").also {
+                                epubBook.resources.add(it)
+                            }
+                        )
+                    )
+                } else {
+                    epubBook.addSection(name, Resource(html.toByteArray(), "Text/$name.html"))
+                }
+            }
+        }
     }
 
     private fun setEpubMetadata(book: Book, epubBook: EpubBook) {

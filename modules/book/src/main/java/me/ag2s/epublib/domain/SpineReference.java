@@ -13,6 +13,7 @@ public class SpineReference extends ResourceReference implements Serializable {
 
     private static final long serialVersionUID = -7921609197351510248L;
     private boolean linear;//default = true;
+    private String properties; // 用于存储额外属性，如 duokan-page-fullscreen
 
     public SpineReference(Resource resource) {
         this(resource, true);
@@ -47,6 +48,14 @@ public class SpineReference extends ResourceReference implements Serializable {
 
     public void setLinear(boolean linear) {
         this.linear = linear;
+    }
+
+    public String getProperties() {
+        return properties;
+    }
+
+    public void setProperties(String properties) {
+        this.properties = properties;
     }
 
 }
